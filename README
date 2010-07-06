@@ -1,0 +1,19 @@
+Paul Hubbard phubbard@watchotaku.com
+July 6 2010
+
+This is a Python driver/interface for the MicroSet Watch Timing machine - 
+
+http://www.bmumford.com/mset/modelwatch1.html
+
+The goal of this project is to create an open-source interface to save, plot
+and perhaps analyze MicroSet data.
+
+Current status:
+* Code started 6/5/2010
+* Serial cable build and verified 6/5/2010 - http://watchotaku.com/display/swr/2010/07/06/Microset+serial+cable+build
+* Did see some data in a serial terminal, and from that and email with Bryan Mumford
+  I have a pretty good idea of how to start writing code.
+
+Next steps and ideas:
+* Use vuesz to generate live plots
+* Log data to disk
