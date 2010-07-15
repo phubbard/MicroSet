@@ -32,11 +32,12 @@ class THOptions(usage.Options):
 
 class MicroSet(LineReceiver):
     def __init__(self, filename, data_dir=None, run_time=0, watch_url=None):
+
         self.dfile = MSDatafile(filename, data_dir, watch_url=watch_url)
         logging.debug('Filename: %s ' % self.dfile.filename)
         if run_time > 0:
             logging.debug('Run time: %d seconds' % run_time)
-        self.end_time = self.go_time + run_time
+        self.end_time = time.time() + run_time
         self.run_time = run_time
 
     def connectionMade(self):
@@ -44,7 +45,36 @@ class MicroSet(LineReceiver):
         self.tzero = time.time()
 
 
+    def parse_rate_datum(self, strings):
+        assert(len(strings) == 2)
+
+        vph = 0.0
+        beat_error = 0
+        try:
+            vph = float(strings[0])
+            prefix_str = strings[1][0]
+            beat_error = int(strings[1][1:])
+        except ValueError, ve:
+            logging.exception('Error parsing rate! %s' % ve)
+            return None, None
+
+        return vph, beat_error
+
+    def parse_beat_error(self, string):
+        assert(len(string) == 1)
+        beat_error = 0
+        try:
+            prefix_str = strings[1][0]
+            assert(prefix_str == 'W')
+            beat_error = int(strings[1][1:])
+        except ValueError, ve:
+            logging.exception('Error parsing beat error! %s' % ve)
+            return None, None
+
+        return beat_error
+
     def lineReceived(self, line):
+        logging.debug(line)
         ts = time.time() - self.tzero
 
         try:
@@ -53,27 +83,20 @@ class MicroSet(LineReceiver):
             logging.exception('Error parsing string; ignored. Error %s' % ve)
             return
 
-        try:
-            f = []
-            for x in strs:
-                f.append(float(x))
-        except ValueError, ve:
-            logging.exception('Error parsing into float! %s' % ve)
-            return
-
         if len(strs) == 0:
             logging.warn('Empty line ignored!')
             return
 
-        logging.debug(line)
         if len(strs) == 1:
             logging.info('Looks like beat error data')
+            logging.debug(self.parse_beat_error(strs))
         elif len(strs) == 2:
             logging.info('Looks like rate data')
+            logging.debug(self.parse_rate_datum(strs))
         else:
             logging.error('Unknown data type - %d fields found!' % len(strs))
             return
-        
+
         #self.dfile.write_datum(ts, fv)
 
         if self.run_time > 0:

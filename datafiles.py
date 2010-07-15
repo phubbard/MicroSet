@@ -33,21 +33,19 @@ class MSDatafile():
         return self.fh.flush()
 
     def write_beat_error(self, time, reading):
-        pass
+        self.fh.write('%f\t\t%f\n' % (time, reading))
+        self.fh.flush()
 
     def write_rate_error(self, time, rate, error):
-        pass
-
-    def write_datum(self, time, reading):
-        self.fh.write('%f\t%f' % (time, reading))
-        self.fh.write(os.linesep)
+        self.fh.write('%f\t%f\t%f\n' % (time, error, rate))
+        self.fh.flush()
 
     def write_fileheader(self):
         buf = []
         rn = datetime.date.today()
 
         buf.append('Filename: %s' % self.filename)
-        if self.watch_url:
+        if hasattr(self, 'watch_url'):
             buf.append('Watch info at: ' + self.watch_url)
         buf.append('Copyright Paul Hubbard (phubbard@watchotaku.com) %d' % rn.year)
         buf.append('License: http://creativecommons.org/licenses/by/3.0/us/')
@@ -55,7 +53,7 @@ class MSDatafile():
         buf.append('Timestamp: %s' % datetime.datetime.now())
         buf.append('UTC timestamp: %s' % datetime.datetime.utcnow())
         buf.append('')
-        buf.append('Time(seconds)\tLux')
+        buf.append('Time(seconds)\tBeat error\tRate')
 
         for line in buf:
             self.fh.write(line)
