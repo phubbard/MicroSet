@@ -23,6 +23,7 @@ from datafiles import MSDatafile
 class THOptions(usage.Options):
     optParameters = [
         ['baudrate', 'b', 9600, 'Serial baudrate'],
+        ['vph', 'v', 28800, 'Vibrations per hour'],
         ['port', 'p', '/dev/tty.KeySerial1', 'Serial port to use'],
         ['filename', 'f', 'datafile.txt', 'datafile to append to'],
         ['watch_url', 'u', None, 'URL for watch information'],
@@ -31,9 +32,9 @@ class THOptions(usage.Options):
         ]
 
 class MicroSet(LineReceiver):
-    def __init__(self, filename, data_dir=None, run_time=0, watch_url=None):
+    def __init__(self, filename, vph, data_dir=None, run_time=0, watch_url=None):
 
-        self.dfile = MSDatafile(filename, data_dir, watch_url=watch_url)
+        self.dfile = MSDatafile(filename, data_dir, vph, watch_url=watch_url)
         logging.debug('Filename: %s ' % self.dfile.filename)
         if run_time > 0:
             logging.debug('Run time: %d seconds' % run_time)
@@ -91,8 +92,9 @@ class MicroSet(LineReceiver):
             logging.info('Looks like beat error data')
             logging.debug(self.parse_beat_error(strs))
         elif len(strs) == 2:
-            logging.info('Looks like rate data')
-            logging.debug(self.parse_rate_datum(strs))
+            rate, error = self.parse_rate_datum(strs)
+            logging.info('Looks like rate data: %f %f %d' % (ts, rate, error))
+            self.dfile.write_rate_error(ts, rate, error)
         else:
             logging.error('Unknown data type - %d fields found!' % len(strs))
             return
@@ -124,9 +126,10 @@ if __name__ == '__main__':
     data_dir = o.opts['data_dir']
     run_time = int(o.opts['runtime'])
     watch_url = o.opts['watch_url']
+    vph = o.opts['vph']
 
     logging.debug('About to open port %s' % port)
-    mset = MicroSet(filename, data_dir=data_dir, run_time=run_time,
+    mset = MicroSet(filename, vph, data_dir=data_dir, run_time=run_time,
                  watch_url=watch_url)
     s = SerialPort(mset, port, reactor, baudrate=baudrate)
 
