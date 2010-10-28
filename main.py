@@ -34,7 +34,7 @@ class THOptions(usage.Options):
 class MicroSet(LineReceiver):
     def __init__(self, filename, vph, data_dir=None, run_time=0, watch_url=None):
 
-        self.dfile = MSDatafile(filename, data_dir, vph, watch_url=watch_url)
+        self.dfile = MSDatafile(filename, vph, data_dir, watch_url=watch_url)
         logging.debug('Filename: %s ' % self.dfile.filename)
         if run_time > 0:
             logging.debug('Run time: %d seconds' % run_time)
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     data_dir = o.opts['data_dir']
     run_time = int(o.opts['runtime'])
     watch_url = o.opts['watch_url']
-    vph = o.opts['vph']
+    vph = int(o.opts['vph'])
 
     logging.debug('About to open port %s' % port)
     mset = MicroSet(filename, vph, data_dir=data_dir, run_time=run_time,

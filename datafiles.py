@@ -38,7 +38,10 @@ class MSDatafile():
         self.fh.flush()
 
     def write_rate_error(self, time, rate, error):
-        self.fh.write('%f\t%f\t%f\n' % (time, error, rate))
+        ref_rate = float(self.vph / 3600.0)
+        this_vph = 3600.0 / rate
+        secs_day = float(this_vph - self.vph) / ref_rate
+        self.fh.write('%f\t%f\t%f\t%f\t%f\n' % (time, error, rate, this_vph, secs_day))
         self.fh.flush()
 
     def write_fileheader(self):
@@ -55,7 +58,7 @@ class MSDatafile():
         buf.append('Timestamp: %s' % datetime.datetime.now())
         buf.append('UTC timestamp: %s' % datetime.datetime.utcnow())
         buf.append('')
-        buf.append('Time(seconds)\tBeat error\tRate')
+        buf.append('Time(seconds)\tBeat error\tRate\tvph\tSecs/day')
 
         for line in buf:
             self.fh.write(line)
